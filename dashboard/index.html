@@ -33,59 +33,12 @@
   --accent: #d55b1f;
   --accent-ink: #ffffff;
   --focus: #d55b1f;
-  --shadow: 0 1px 2px rgba(19, 71, 52, 0.05), 0 8px 24px -12px rgba(19, 71, 52, 0.12);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --page: #0a2219;
-    --surface: #0f2c21;
-    --surface-2: #163a2c;
-    --text: #f1e9dd;
-    --text-2: #c6bdae;
-    --muted: #93a197;
-  --best-mix: 40%;
-    --grid: #1c3d30;
-    --axis: #2e5243;
-    --border: rgba(241, 233, 221, 0.10);
-    --border-strong: rgba(241, 233, 221, 0.20);
-    --s1: #8fcfaa;
-    --s2: #ea7a42;
-    --seq-lo: #12311f;
-    --seq-hi: #8fcfaa;
-    --seq-ink: #0a2219;
-    --good: #55c58e;
-    --critical: #f07d6d;
-    --accent: #ea7a42;
-    --accent-ink: #0a2219;
-    --focus: #ea7a42;
-    --shadow: none;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --page: #0a2219;
-  --surface: #0f2c21;
-  --surface-2: #163a2c;
-  --text: #f1e9dd;
-  --text-2: #c6bdae;
-  --muted: #93a197;
-  --best-mix: 40%;
-  --grid: #1c3d30;
-  --axis: #2e5243;
-  --border: rgba(241, 233, 221, 0.10);
-  --border-strong: rgba(241, 233, 221, 0.20);
-  --s1: #8fcfaa;
-  --s2: #ea7a42;
-  --seq-lo: #12311f;
-  --seq-hi: #8fcfaa;
-  --seq-ink: #0a2219;
-  --good: #55c58e;
-  --critical: #f07d6d;
-  --accent: #ea7a42;
-  --accent-ink: #0a2219;
-  --focus: #ea7a42;
-  --shadow: none;
+  /* ACMG tiers, pathogenic to benign: dark ends, light centre */
+  --tier-p: #9e3a17;
+  --tier-lp: #e3a07a;
+  --tier-vus: #d3c6b0;
+  --tier-lb: #9cc0a8;
+  --tier-b: #2a6047;
 }
 
 * { box-sizing: border-box; }
@@ -129,16 +82,10 @@ button, input, select { font: inherit; color: inherit; }
 .section-tab:hover { color: var(--bar-ink); }
 .section-tab[aria-selected="true"] { color: var(--bar-ink); }
 .section-tab[aria-selected="true"]::after { background: var(--bar-accent); }
-.actions { display: flex; align-items: center; gap: 8px; justify-self: end; }
-.app-header .btn { background: transparent; color: var(--bar-ink); border-color: var(--bar-line); }
-.app-header .btn:hover { background: rgba(241, 233, 221, 0.08); }
 @media (max-width: 640px) {
-  .bar { grid-template-columns: minmax(0, 1fr) auto; row-gap: 6px; padding-top: 10px; }
+  .bar { grid-template-columns: minmax(0, 1fr); row-gap: 6px; padding-top: 10px; }
   .sections { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; gap: 0; }
   .section-tab { flex: 1; }
-  .actions { gap: 6px; }
-  .actions .btn { padding: 4px 8px; font-size: 13px; }
-  .tabs { gap: 14px; }
 }
 .btn {
   appearance: none; border: 1px solid var(--border-strong); background: var(--surface);
@@ -149,29 +96,70 @@ button, input, select { font: inherit; color: inherit; }
 .btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
 .btn-primary:hover { background: color-mix(in srgb, var(--accent) 88%, #000); border-color: color-mix(in srgb, var(--accent) 88%, #000); }
 
-.viewrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; column-gap: 24px; border-bottom: 1px solid var(--border-strong); }
-.viewrow .tabs { align-self: flex-end; }
-.bench-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 0; margin-left: auto; }
-.bench-actions .btn { padding-top: 4px; padding-bottom: 4px; }
-.tabs { display: flex; gap: 24px; overflow-x: auto; scrollbar-width: none; margin-bottom: -1px; }
+/* View bar: a white strip under the header. The views sit in a centred
+   segmented switch, lined up with the benchmark tabs above; downloads sit right. */
+.tab-bar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; }
+.viewrow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; column-gap: 24px; padding-top: 10px; padding-bottom: 10px; }
+.viewrow .tabs { grid-column: 2; grid-row: 1; }
+/* Each view's own controls (model selection, scale) sit at the left of the strip */
+.view-tools { grid-column: 1; grid-row: 1; justify-self: start; min-width: 0; }
+.vt { display: none; align-items: center; gap: 8px; }
+body[data-tab="leaderboard"] .vt[data-for="leaderboard"],
+body[data-tab="confusion"] .vt[data-for="confusion"],
+body[data-tab="criteria"] .vt[data-for="criteria"] { display: flex; }
+.vt .lb-pick { display: flex; align-items: center; gap: 8px; }
+.vt .picker-btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: 14px; line-height: 20px;
+  border-radius: 0; color: var(--text); font-weight: 500;
+}
+.vt .picker-btn::after {
+  content: ""; width: 6px; height: 6px; margin-top: -3px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg); opacity: 0.7;
+}
+.vt .picker-btn[aria-expanded="true"]::after { transform: rotate(-135deg); margin-top: 3px; }
+.vt [id$="AllBtn"] { padding: 6px 4px; border: 0; background: none; color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; }
+.vt [id$="AllBtn"]::after { content: none; }
+.vt [id$="AllBtn"]:hover { color: var(--text); background: none; }
+.vt .seg button { padding-top: 4px; padding-bottom: 4px; }
+.bench-actions { grid-column: 3; grid-row: 1; justify-self: end; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tabs {
+  display: inline-flex; gap: 2px; padding: 3px; border-radius: 10px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  overflow-x: auto; scrollbar-width: none;
+}
 .tabs::-webkit-scrollbar { display: none; }
 .tab {
-  appearance: none; background: none; border: 0; border-bottom: 2px solid transparent;
-  padding: 12px 0 10px; font-size: 15px; font-weight: 500; color: var(--text-2);
-  cursor: pointer; white-space: nowrap;
+  appearance: none; background: none; border: 1px solid transparent; border-radius: 7px;
+  padding: 6px 18px; font-size: 14px; font-weight: 500; line-height: 20px; color: var(--text-2);
+  cursor: pointer; white-space: nowrap; transition: background-color 0.15s, color 0.15s;
 }
-.tab:hover { color: var(--text); }
-.tab[aria-selected="true"] { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
-.tab-bar { background: var(--page); position: sticky; top: 0; z-index: 20; }
+.tab:hover { color: var(--text); background: rgba(19, 71, 52, 0.05); }
+.tab[aria-selected="true"] {
+  color: var(--text); font-weight: 600; background: var(--surface); border-color: var(--border-strong);
+  box-shadow: 0 1px 2px rgba(19, 71, 52, 0.08);
+}
+.btn-icon { display: inline-flex; align-items: center; gap: 6px; }
+.btn-icon svg { flex-shrink: 0; }
 
 main.wrap { padding-top: 24px; padding-bottom: 48px; }
 .view { display: grid; gap: 20px; }
 .view-head h2 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
 .view-head p { margin: 4px 0 0; color: var(--text-2); max-width: 120ch; }
-.view-head .sr-only + p, .lb-hero .sr-only + p { margin-top: 0; }
+.view-head .sr-only + p { margin-top: 0; }
 
-/* Cards */
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; box-shadow: var(--shadow); min-width: 0; }
+/* Panels: every figure sits on a white card; the main figure of each tab
+   (.fig-main) gets a larger title. */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 22px; min-width: 0; }
+.card.fig-main + .card { margin-top: 12px; }
+.fig-main .card-head h3 { font-size: 19px; }
+
+/* ACMG tier chips */
+.tier { display: inline-block; min-width: 30px; padding: 0 5px; border-radius: 3px; font-size: 12px; font-weight: 650; line-height: 19px; text-align: center; white-space: nowrap; background: var(--t); color: var(--t-ink); }
+.tier-p { --t: var(--tier-p); --t-ink: #ffffff; }
+.tier-lp { --t: var(--tier-lp); --t-ink: var(--text); }
+.tier-vus { --t: var(--tier-vus); --t-ink: var(--text); }
+.tier-lb { --t: var(--tier-lb); --t-ink: var(--text); }
+.tier-b { --t: var(--tier-b); --t-ink: #ffffff; }
 .card-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
 .card-head h3 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
 .card-head p { margin: 2px 0 0; color: var(--text-2); font-size: 14px; max-width: 120ch; }
@@ -243,13 +231,15 @@ table.heat tr.group td { font-size: 13px; font-weight: 600; color: var(--text-2)
 table.cm { width: auto; }
 table.cm th.colh, table.cm td.h { width: var(--cm-cell); min-width: var(--cm-cell); max-width: var(--cm-cell); }
 table.cm td.h { position: relative; height: var(--cm-cell); padding: 0; }
-table.cm thead th { border-bottom: 0; }
-table.cm th.cm-axt { text-align: center; font-size: 13px; font-weight: 600; color: var(--text-2); padding: 0 0 2px; border-bottom: 0; }
+table.cm tfoot th { border-bottom: 0; vertical-align: top; }
+table.cm th.cm-axt { text-align: center; font-size: 13px; font-weight: 600; color: var(--text-2); padding: 2px 0 0; border-bottom: 0; }
 table.cm td.cm-ylab { width: 20px; padding: 0 2px 0 0; vertical-align: middle; }
 table.cm td.cm-ylab svg { display: block; overflow: visible; }
 .cm-ylab text { fill: var(--text-2); font-size: 13px; font-weight: 600; }
 table.cm td.diag { font-weight: 650; }
 table.cm td.xdir { background: color-mix(in srgb, var(--critical) 16%, var(--surface)); color: var(--critical); font-weight: 650; }
+.cm-lab { font-size: 13px; font-weight: 650; color: var(--text); white-space: nowrap; }
+table.cm td.rowh { text-align: right; padding-right: 8px; }
 .cm-title { font-size: 14px; font-weight: 600; margin: 0 0 10px; display: flex; align-items: center; }
 
 .empty { color: var(--muted); padding: 24px 0; text-align: center; }
@@ -278,9 +268,6 @@ body[data-section="ranking"] .tab-bar, body[data-section="ranking"] .cls-only, b
 .rank-empty { padding: 48px 24px; text-align: center; }
 .rank-empty h3 { margin: 0; font-size: 19px; font-weight: 700; }
 .rank-empty p { margin: 6px auto 0; color: var(--text-2); max-width: 52ch; }
-.lb-hero { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
-.lb-hero h2 { margin: 0; font-size: 34px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; }
-.lb-hero p { margin: 4px 0 0; color: var(--text-2); max-width: 70ch; }
 .lb-card { padding-bottom: 12px; }
 table.lb td { padding-top: 13px; padding-bottom: 13px; }
 .lb-rank { display: inline-block; min-width: 24px; font-size: 19px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); }
@@ -314,22 +301,16 @@ tr.lb-divider td { text-transform: none; letter-spacing: 0; font-size: 13px; fon
 
 /* Model pickers */
 @media (max-width: 767px) {
-  .viewrow { display: block; border-bottom: 0; }
-  .tabs { border-bottom: 1px solid var(--border-strong); margin-bottom: 0; }
-  .tab { margin-bottom: -1px; }
-  .bench-actions { padding: 10px 0 0; }
-  .bench-actions .btn { flex: 1 1 auto; }
+  .viewrow { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+  .tabs { display: flex; order: 1; }
+  .view-tools { order: 2; }
+  .vt { flex-wrap: wrap; }
+  .bench-actions { order: 3; }
+  .tab { flex: 1 0 auto; padding-left: 10px; padding-right: 10px; font-size: 13.5px; }
+  .bench-actions .btn { flex: 1 1 auto; justify-content: center; }
 }
-.sel-lbl { font-size: 14px; color: var(--text-2); }
 .chips { display: flex; flex-wrap: wrap; gap: 4px; }
-.mchip { appearance: none; border: 1px solid var(--border); background: none; border-radius: 999px; padding: 2px 10px 2px 8px; font-size: 13px; color: var(--muted); cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; }
-.mchip .swatch { opacity: 0.35; }
-.mchip:hover { color: var(--text); border-color: var(--border-strong); }
-.mchip[aria-pressed="true"] { color: var(--text); border-color: var(--border-strong); background: var(--surface-2); font-weight: 500; }
-.mchip[aria-pressed="true"] .swatch { opacity: 1; }
 
-.mchip .x { margin-left: 6px; color: var(--muted); font-size: 14px; line-height: 1; }
-.mchip:hover .x { color: var(--critical); }
 .picker { position: relative; }
 .picker-btn { padding: 2px 10px; font-size: 13px; line-height: 18px; border-radius: 999px; }
 .picker-pop { position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; width: min(360px, calc(100vw - 32px)); background: var(--surface); border: 1px solid var(--border-strong); border-radius: 14px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16); padding: 10px; }
@@ -346,11 +327,7 @@ tr.lb-divider td { text-transform: none; letter-spacing: 0; font-size: 13px; fon
 .pk-item.off { opacity: 0.45; cursor: default; }
 .picker-note { margin: 8px 4px 0; font-size: 12px; color: var(--muted); }
 
-.lb-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px 20px; margin-left: auto; }
 .lb-pick { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px 8px; }
-.lb-tools .picker-pop { left: auto; right: 0; }
-@media (max-width: 767px) { .lb-tools, .lb-pick { justify-content: flex-start; margin-left: 0; } .lb-tools .picker-pop { left: 0; right: auto; } }
-.lb-all-pill { margin: 0; padding: 2px 10px; border-radius: 999px; font-size: 13px; line-height: 18px; }
 
 /* Leaderboard table: measures as rows, models as columns */
 table.lbt { font-size: 14px; border-collapse: separate; border-spacing: 0; }
@@ -382,7 +359,7 @@ td.lbt-n.small { color: var(--muted); }
 .lbt-nbar span { display: block; height: 100%; background: var(--text-2); border-radius: 3px; }
 .lbt-row { font-weight: 500; }
 td.lbt-first.indent { padding-left: 22px; }
-.lbt-abbr { display: inline-block; min-width: 38px; font-weight: 650; }
+.lbt-row .tier { margin-right: 8px; }
 .lbt-dag { color: var(--muted); font-weight: 600; margin-left: 2px; }
 tr.lbt-small .lbt-row { color: var(--text-2); }
 tr.lbt-overall td { font-size: 15px; }
@@ -404,19 +381,22 @@ tr.lbt-sec td { font-size: 13px; font-weight: 600; color: var(--text-2); backgro
 .scatter.hl .sc-pt.on { opacity: 1; }
 .scatter.hl .sc-pt.on circle { stroke-width: 3; }
 
-/* Grouped vertical bars */
-.vb { display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 8px; }
-.vb-y { position: relative; height: 280px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.vb-y span { position: absolute; right: 0; transform: translateY(50%); }
-.vb-plot { position: relative; height: 280px; display: flex; gap: 12px; padding: 0 6px; border-bottom: 1px solid var(--axis); }
-.vb-plot .gl { position: absolute; left: 0; right: 0; height: 1px; background: var(--grid); }
-.vb-group { position: relative; flex: 1; display: flex; align-items: flex-end; justify-content: center; gap: 2px; min-width: 0; }
-.vb-bar { position: relative; flex: 1; max-width: 34px; min-height: 1px; border-radius: 3px 3px 0 0; }
-.vb-bar.vb-empty { height: 100%; background: repeating-linear-gradient(0deg, transparent 0 6px, var(--grid) 6px 7px); border-radius: 0; opacity: 0.6; }
-.vb-val { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); padding-bottom: 3px; font-size: 11px; color: var(--text-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.vb-x { display: flex; gap: 12px; padding: 0 6px; }
-.vb-xl { flex: 1; min-width: 0; text-align: center; padding-top: 8px; font-size: 13px; font-weight: 500; line-height: 1.3; }
-.vb-xl small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+/* ACMG criteria dot grid: criteria down, models across, dot area = share of variants */
+table.cg td.cg-c { padding: 3px 6px; text-align: center; }
+table.cg td.cg-c.na { color: var(--muted); }
+.cg-cell { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
+.cg-dot-box { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; }
+.cg-dot { display: block; border-radius: 50%; }
+.cg-dot.cg-zero { width: 5px; height: 5px; border: 1px solid var(--axis); }
+.cg-v { min-width: 30px; text-align: left; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+table.cg td.cg-label { max-width: 300px; min-width: 220px; line-height: 1.3; padding-top: 5px; padding-bottom: 5px; }
+.cg-code { display: inline-block; min-width: 46px; font-weight: 600; color: var(--text); }
+.cg-def { color: var(--text-2); font-size: 13px; }
+table.cg tr.cg-str td { font-size: 12px; font-weight: 500; color: var(--muted); padding-top: 10px; padding-bottom: 2px; border-bottom: 0; }
+table.cg.compact td.cg-c { padding: 2px 3px; }
+.cg-key { display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--text-2); }
+.cg-key > span { display: inline-flex; align-items: center; gap: 2px; }
+@media (max-width: 640px) { .cg-def { display: none; } table.cg td.cg-label { min-width: 64px; } }
 
 /* Wide tables: first column stays put while scrolling sideways */
 #agreeHeat th:first-child, #agreeHeat td:first-child { position: sticky; left: 0; z-index: 1; background: var(--surface); }
@@ -438,10 +418,6 @@ tr.lbt-sec td { font-size: 13px; font-weight: 600; color: var(--text-2); backgro
 
 table.heat.compact td.h { min-width: 26px; height: 26px; padding: 0; }
 table.heat.compact th.colh { min-width: 26px; max-width: 56px; font-size: 11px; }
-
-/* ACMG criteria: pathogenic panel above the benign panel */
-.crit-panel + .crit-panel { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--grid); }
-.crit-h { margin: 0 0 24px; font-size: 14px; font-weight: 600; color: var(--text-2); }
 
 /* Confusion grid and tables */
 .cm-grid { display: grid; gap: 40px 48px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); }
@@ -484,38 +460,14 @@ th.selcol { color: var(--text); }
       <button class="section-tab" role="tab" type="button" data-section="classification">Classification</button>
       <button class="section-tab" role="tab" type="button" data-section="ranking">Ranking</button>
     </nav>
-    <div class="actions">
-      <button class="btn" id="themeBtn" type="button">Theme: System</button>
-    </div>
   </div>
 </header>
 
 <div class="tab-bar">
   <div class="wrap viewrow">
-    <nav class="tabs" role="tablist" aria-label="Classification views">
-      <button class="tab" role="tab" data-tab="leaderboard">Leaderboard</button>
-      <button class="tab" role="tab" data-tab="confusion">Confusion matrices</button>
-      <button class="tab" role="tab" data-tab="criteria">ACMG criteria</button>
-    </nav>
-    <div class="bench-actions">
-      <button class="btn cls-only" id="csvBtn" type="button" title="Every benchmark variant with the expert classification and each model's call">Download variants (CSV)</button>
-    </div>
-  </div>
-</div>
-
-<main class="wrap">
-
-  <!-- LEADERBOARD -->
-  <section class="view" id="view-leaderboard" role="tabpanel">
-    <div class="lb-hero">
-      <div>
-        <h2 class="sr-only">Leaderboard</h2>
-        <p id="lbLead"></p>
-      </div>
-      <div class="lb-tools">
+    <div class="view-tools">
+      <div class="vt" data-for="leaderboard">
         <div class="lb-pick">
-          <span class="sel-lbl">Showing</span>
-          <div class="chips" id="lbChips" role="group" aria-label="Models shown"></div>
           <div class="picker">
             <button type="button" class="btn picker-btn" id="lbPickBtn" aria-haspopup="true" aria-expanded="false">Choose models</button>
             <div class="picker-pop" id="lbPickPop" hidden>
@@ -530,8 +482,50 @@ th.selcol { color: var(--text); }
           <button data-v="3" type="button">3-class</button><button data-v="5" type="button">5-class</button>
         </div>
       </div>
+      <div class="vt" data-for="confusion">
+        <div class="lb-pick">
+          <div class="picker">
+            <button type="button" class="btn picker-btn" id="cmPickBtn" aria-haspopup="true" aria-expanded="false">Choose models</button>
+            <div class="picker-pop" id="cmPickPop" hidden>
+              <input type="search" id="cmPickQ" placeholder="Search models" aria-label="Search models">
+              <div class="picker-list" id="cmPickList"></div>
+              <p class="picker-note">Confusion matrices are drawn for the selected models only.</p>
+            </div>
+          </div>
+          <button type="button" class="btn picker-btn" id="cmAllBtn" hidden>Show all</button>
+        </div>
+      </div>
+      <div class="vt" data-for="criteria">
+        <div class="lb-pick">
+          <div class="picker">
+            <button type="button" class="btn picker-btn" id="critPickBtn" aria-haspopup="true" aria-expanded="false">Choose models</button>
+            <div class="picker-pop" id="critPickPop" hidden>
+              <input type="search" id="critPickQ" placeholder="Search models" aria-label="Search models">
+              <div class="picker-list" id="critPickList"></div>
+              <p class="picker-note">The criteria charts show the selected models only.</p>
+            </div>
+          </div>
+          <button type="button" class="btn picker-btn" id="critAllBtn" hidden>Show all</button>
+        </div>
+      </div>
     </div>
-    <div class="card lb-card" data-static>
+    <nav class="tabs" role="tablist" aria-label="Classification views">
+      <button class="tab" role="tab" data-tab="leaderboard">Leaderboard</button>
+      <button class="tab" role="tab" data-tab="confusion">Confusion matrices</button>
+      <button class="tab" role="tab" data-tab="criteria">ACMG criteria</button>
+    </nav>
+    <div class="bench-actions">
+      <button class="btn btn-icon cls-only" id="csvBtn" type="button" title="Every benchmark variant with the expert classification and each model's call"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg>Variants CSV</button>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- LEADERBOARD -->
+  <section class="view" id="view-leaderboard" role="tabpanel">
+    <h2 class="sr-only">Leaderboard</h2>
+    <div class="card fig-main lb-card" data-static>
       <div class="card-head">
         <div>
           <h3 id="lbTitle"></h3>
@@ -564,28 +558,8 @@ th.selcol { color: var(--text); }
 
   <!-- CONFUSION -->
   <section class="view" id="view-confusion" role="tabpanel" hidden>
-    <div class="lb-hero">
-      <div>
-        <h2 class="sr-only">Confusion matrices</h2>
-        <p id="cmLead"></p>
-      </div>
-      <div class="lb-tools">
-        <div class="lb-pick">
-          <span class="sel-lbl">Showing</span>
-          <div class="chips" id="cmChips" role="group" aria-label="Models shown"></div>
-          <div class="picker">
-            <button type="button" class="btn picker-btn" id="cmPickBtn" aria-haspopup="true" aria-expanded="false">Choose models</button>
-            <div class="picker-pop" id="cmPickPop" hidden>
-              <input type="search" id="cmPickQ" placeholder="Search models" aria-label="Search models">
-              <div class="picker-list" id="cmPickList"></div>
-              <p class="picker-note">Confusion matrices are drawn for the selected models only.</p>
-            </div>
-          </div>
-          <button type="button" class="btn picker-btn" id="cmAllBtn" hidden>Show all</button>
-        </div>
-      </div>
-    </div>
-    <div class="card" data-static>
+    <h2 class="sr-only">Confusion matrices</h2>
+    <div class="card fig-main" data-static>
       <div class="card-head">
         <div><h3>Confusion matrices</h3><p id="cmSub"></p></div>
         <div class="controls">
@@ -603,40 +577,13 @@ th.selcol { color: var(--text); }
 
   <!-- CRITERIA -->
   <section class="view" id="view-criteria" role="tabpanel" hidden>
-    <div class="lb-hero">
-      <div>
-        <h2 class="sr-only">ACMG/AMP criteria invoked</h2>
-        <p id="critLead"></p>
-      </div>
-      <div class="lb-tools">
-        <div class="lb-pick">
-          <span class="sel-lbl">Showing</span>
-          <div class="chips" id="critChips" role="group" aria-label="Models shown"></div>
-          <div class="picker">
-            <button type="button" class="btn picker-btn" id="critPickBtn" aria-haspopup="true" aria-expanded="false">Choose models</button>
-            <div class="picker-pop" id="critPickPop" hidden>
-              <input type="search" id="critPickQ" placeholder="Search models" aria-label="Search models">
-              <div class="picker-list" id="critPickList"></div>
-              <p class="picker-note">The criteria charts show the selected models only.</p>
-            </div>
-          </div>
-          <button type="button" class="btn picker-btn" id="critAllBtn" hidden>Show all</button>
-        </div>
-      </div>
-    </div>
-    <div class="card" data-static>
+    <h2 class="sr-only">ACMG/AMP criteria invoked</h2>
+    <div class="card fig-main" data-static>
       <div class="card-head">
-        <div><h3>Criteria cited, pathogenic and benign evidence</h3><p>Share of variants for which each model cited a criterion, with strength modifiers collapsed (PM2_Supporting counts as PM2). Each panel has its own scale.<span class="ui-hint"> Hover a code for its definition.</span></p></div>
-        <div class="legend" id="critLegend"></div>
+        <div><h3>Criteria cited, pathogenic and benign evidence</h3><p>Share of variants for which each model cited a criterion, with strength modifiers collapsed (PM2_Supporting counts as PM2). Dot area is the share, on one scale for every criterion.<span class="ui-hint"> Hover a dot for the variant count.</span></p></div>
+        <div class="cg-key" id="critKey" aria-hidden="true"></div>
       </div>
-      <div class="crit-panel">
-        <h4 class="crit-h">Pathogenic evidence</h4>
-        <div id="critPath"></div>
-      </div>
-      <div class="crit-panel">
-        <h4 class="crit-h">Benign evidence</h4>
-        <div id="critBen"></div>
-      </div>
+      <div class="table-wrap"><table class="lbt cg" id="critGrid"></table></div>
     </div>
   </section>
 
@@ -668,44 +615,50 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
   const DIR_LABEL = { pathogenic: "P/LP", vus: "VUS", benign: "B/LB" };
   const FAMILY_SHORT = {};
   const PROVIDER_ORDER = ["Anthropic", "OpenAI", "Google", "Rule-based", "Other"];
+  // [code, definition, short label shown beside the code]
   const CRITERIA = {
     pathogenic: [
-      ["PVS1", "Null variant in a gene where loss of function is a known mechanism"],
-      ["PS1", "Same amino-acid change as an established pathogenic variant"],
-      ["PS2", "De novo, maternity and paternity confirmed"],
-      ["PS3", "Well-established functional studies show a damaging effect"],
-      ["PS4", "Prevalence in affected individuals significantly above controls"],
-      ["PM1", "Located in a mutational hot spot or critical functional domain"],
-      ["PM2", "Absent or at extremely low frequency in population databases"],
-      ["PM3", "Detected in trans with a pathogenic variant (recessive disorders)"],
-      ["PM4", "Protein length change from an in-frame indel or stop-loss"],
-      ["PM5", "Novel missense at a residue where another pathogenic missense is known"],
-      ["PM6", "Assumed de novo, without confirmation of parentage"],
-      ["PP1", "Cosegregation with disease in multiple affected family members"],
-      ["PP2", "Missense in a gene with a low rate of benign missense variation"],
-      ["PP3", "Computational evidence supports a deleterious effect"],
-      ["PP4", "Patient phenotype or family history highly specific for the gene"],
-      ["PP5", "Reputable source reports the variant as pathogenic"]
+      ["PVS1", "Null variant in a gene where loss of function is a known mechanism", "Null variant, loss-of-function gene"],
+      ["PS1", "Same amino-acid change as an established pathogenic variant", "Same amino-acid change as a pathogenic variant"],
+      ["PS2", "De novo, maternity and paternity confirmed", "De novo, parentage confirmed"],
+      ["PS3", "Well-established functional studies show a damaging effect", "Functional studies show damage"],
+      ["PS4", "Prevalence in affected individuals significantly above controls", "Enriched in affected individuals"],
+      ["PM1", "Located in a mutational hot spot or critical functional domain", "Hot spot or critical domain"],
+      ["PM2", "Absent or at extremely low frequency in population databases", "Absent or rare in population databases"],
+      ["PM3", "Detected in trans with a pathogenic variant (recessive disorders)", "In trans with a pathogenic variant"],
+      ["PM4", "Protein length change from an in-frame indel or stop-loss", "Protein length change"],
+      ["PM5", "Novel missense at a residue where another pathogenic missense is known", "New missense at a pathogenic residue"],
+      ["PM6", "Assumed de novo, without confirmation of parentage", "Assumed de novo"],
+      ["PP1", "Cosegregation with disease in multiple affected family members", "Cosegregates with disease"],
+      ["PP2", "Missense in a gene with a low rate of benign missense variation", "Missense in a missense-intolerant gene"],
+      ["PP3", "Computational evidence supports a deleterious effect", "Computational evidence, damaging"],
+      ["PP4", "Patient phenotype or family history highly specific for the gene", "Phenotype specific for the gene"],
+      ["PP5", "Reputable source reports the variant as pathogenic", "Reputable source reports pathogenic"]
     ],
     benign: [
-      ["BA1", "Allele frequency above 5% in population databases"],
-      ["BS1", "Allele frequency greater than expected for the disorder"],
-      ["BS2", "Observed in a healthy adult where full penetrance is expected"],
-      ["BS3", "Well-established functional studies show no damaging effect"],
-      ["BS4", "Lack of segregation in affected family members"],
-      ["BP1", "Missense in a gene where truncating variants cause disease"],
-      ["BP2", "Observed in trans or in cis with a pathogenic variant"],
-      ["BP3", "In-frame indel in a repetitive region without known function"],
-      ["BP4", "Computational evidence suggests no impact"],
-      ["BP5", "Variant found in a case with an alternate molecular basis"],
-      ["BP7", "Synonymous variant with no predicted splice impact"]
+      ["BA1", "Allele frequency above 5% in population databases", "Allele frequency above 5%"],
+      ["BS1", "Allele frequency greater than expected for the disorder", "Too common for the disorder"],
+      ["BS2", "Observed in a healthy adult where full penetrance is expected", "Seen in a healthy adult"],
+      ["BS3", "Well-established functional studies show no damaging effect", "Functional studies show no damage"],
+      ["BS4", "Lack of segregation in affected family members", "Does not segregate with disease"],
+      ["BP1", "Missense in a gene where truncating variants cause disease", "Missense where truncating variants cause disease"],
+      ["BP2", "Observed in trans or in cis with a pathogenic variant", "In trans or cis with a pathogenic variant"],
+      ["BP3", "In-frame indel in a repetitive region without known function", "In-frame indel in a repeat region"],
+      ["BP4", "Computational evidence suggests no impact", "Computational evidence, no impact"],
+      ["BP5", "Variant found in a case with an alternate molecular basis", "Alternate molecular cause found"],
+      ["BP7", "Synonymous variant with no predicted splice impact", "Synonymous, no splice impact"]
     ]
   };
+  const STRENGTH = { PVS: "Very strong", PS: "Strong", PM: "Moderate", PP: "Supporting", BA: "Stand-alone", BS: "Strong", BP: "Supporting" };
+  const strengthOf = (code) => STRENGTH[code.replace(/\d+$/, "")];
+  // ACMG tier chip: t is p, lp, vus, lb or b
+  const TIER_OF = { P: "p", LP: "lp", VUS: "vus", LB: "lb", B: "b", "P/LP": "p", "B/LB": "b" };
+  const tierChip = (abbr) => `<span class="tier tier-${TIER_OF[abbr]}">${esc(abbr)}</span>`;
 
   const state = {
     tab: "leaderboard", clsTab: "leaderboard",
     scatterScale: "3", lbScale: "3", lbCols: null,
-    cmCols: null, critCols: null, ready: false,
+    cmCols: null, critCols: null,
     cmScale: "5", cmMode: "count",
     agree: "dir_pct"
   };
@@ -776,25 +729,6 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
     $("footer").innerHTML = archived.length ? `${archived.map((m) => esc(m.name)).join(" and ")} ${archived.length > 1 ? "are" : "is"} carried over from an earlier build because the raw results are not in this repository; variant-level comparisons with later runs are unavailable for ${archived.length > 1 ? "them" : "it"}.` : "";
   }
 
-  // ---------- model colours ----------
-  // Each model carries a light-theme colour and, where needed, a lighter
-  // step for the dark theme; m.color always holds the one in use.
-  function isDarkTheme() {
-    const surface = getComputedStyle(document.documentElement).getPropertyValue("--surface").trim() || "#ffffff";
-    return hexLum(surface) < 0.2;
-  }
-  function applyThemeColors() {
-    const dark = isDarkTheme();
-    D.models.forEach((m) => {
-      if (!m.color_light) m.color_light = m.color;
-      m.color = dark && m.color_dark ? m.color_dark : m.color_light;
-    });
-  }
-  function rerenderForTheme() {
-    applyThemeColors();
-    RENDER[state.tab]();
-  }
-
   // ---------- model selection ----------
   const swatch = (m) => `<span class="swatch" style="background:${m.color}"></span>`;
   // Models are named without their method: Opus 5.5 runs through AIVA and through
@@ -827,39 +761,6 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
   const sectionLabel = (m) => SECTIONS.find(([k]) => k === sectionKey(m))[1];
   const bySection = (models) => SECTIONS.map(([k, label]) => [label, models.filter((m) => sectionKey(m) === k), k]).filter(([, ms]) => ms.length);
 
-  // ---------- chart builders ----------
-  // Vertical grouped bars: groups along x, one bar per model in each group.
-  // groups: [{label, sub, tip, bars: [{m, v, text, tip}]}]
-  function verticalBars(groups, opts = {}) {
-    const max = opts.max || 100;
-    const ticks = opts.ticks || [0, 25, 50, 75, 100];
-    const pos = (v) => Math.max(0, Math.min(100, (v / max) * 100));
-    const nBars = Math.max(1, ...groups.map((g) => g.bars.length));
-    const width = opts.width || 1000;
-    const slot = (width - 48) / groups.length / (nBars + 1);
-    const showVals = slot >= 30;
-    const y = ticks.map((t) => `<span style="bottom:${pos(t)}%">${t}${opts.unit || ""}</span>`).join("");
-    const gl = ticks.slice(1).map((t) => `<span class="gl" style="bottom:${pos(t)}%"></span>`).join("");
-    const cols = groups.map((g) => `<div class="vb-group">${g.bars.map((b) => b.v == null
-      ? `<div class="vb-bar vb-empty"${tipAttr(b.tip || `${b.m.name}: no data`)}></div>`
-      : `<div class="vb-bar" style="height:${pos(b.v)}%;background:${b.m.color}"${tipAttr(b.tip || "")}>${showVals ? `<span class="vb-val">${b.text}</span>` : ""}</div>`).join("")}</div>`).join("");
-    const xl = groups.map((g) => `<div class="vb-xl"><span${g.tip ? tipAttr(g.tip) : ""}>${g.label}</span>${g.sub ? `<small>${g.sub}</small>` : ""}</div>`).join("");
-    return `<div class="vb"><div class="vb-y">${y}</div><div class="vb-plot">${gl}${cols}</div><div></div><div class="vb-x">${xl}</div></div>` +
-      (showVals ? "" : `<p class="note">Values on hover.</p>`);
-  }
-
-  function niceMax(v) {
-    const steps = [5, 10, 20, 25, 40, 50, 60, 75, 80, 100];
-    return steps.find((s) => s >= v) || Math.ceil(v / 10) * 10;
-  }
-
-  function hexLum(hex) {
-    const c = rgba(hex);
-    if (!c) return 1;
-    const [r, g, b] = [1, 3, 5].map((i) => parseInt(c.hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  }
-
   const collapse3 = (m5) => {
     const idx = [0, 0, 1, 2, 2];
     const out = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
@@ -887,10 +788,6 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
       state[col] = valid.length && valid.length < D.models.length ? valid : null;
     });
   }
-  const shownLead = (p, what) => {
-    const n = shownModels(p).length;
-    return state[SHOWN[p].col] ? `Showing ${n} of ${D.models.length} models. ${what}` : `All ${D.models.length} models. ${what}`;
-  };
   const shownModels = (p) => (state[SHOWN[p].col] ? D.models.filter((m) => state[SHOWN[p].col].includes(m.key)) : D.models.slice());
   const lbShown = () => shownModels("lb");
 
@@ -912,12 +809,8 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
   function renderShownPicker(p) {
     const shown = shownModels(p);
     const all = !state[SHOWN[p].col];
-    $(p + "Chips").innerHTML = all
-      ? `<span class="pill lb-all-pill">All ${D.models.length} models</span>`
-      : shown.map((m) => `<button type="button" class="mchip" data-key="${esc(m.key)}" aria-pressed="true"${tipAttr(`${fullName(m)}\nRemove from ${SHOWN[p].where}`)}>${swatch(m)}${esc(nameIn(m, shown))}<span class="x" aria-hidden="true">×</span></button>`).join("");
-    $(p + "Chips").querySelectorAll(".mchip").forEach((b) => b.onclick = () => toggleShown(p, b.dataset.key));
     $(p + "AllBtn").hidden = all;
-    $(p + "PickBtn").textContent = all ? "Choose models" : "Add or remove";
+    $(p + "PickBtn").textContent = all ? `All ${D.models.length} models` : `${shown.length} of ${D.models.length} models`;
     const q = ($(p + "PickQ").value || "").trim().toLowerCase();
     const keys = shown.map((m) => m.key);
     const list = D.models.filter((m) => !q || `${m.name} ${m.family} ${m.type}`.toLowerCase().includes(q));
@@ -961,14 +854,11 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
     const ranked = visible.filter(isFull).sort((a, b) => b[overallKey] - a[overallKey]);
     const partial = visible.filter((m) => !isFull(m)).sort((a, b) => b[overallKey] - a[overallKey]);
     const cols = [...ranked, ...partial];
-    $("lbLead").textContent = state.lbCols
-      ? `Showing ${visible.length} of ${D.models.length} classifiers, each scored against the ClinGen expert classification of ${int(D.metadata.total_variants)} variants. Ranks and highlights are among the models shown.`
-      : `${D.models.length} classifiers (${bySection(D.models).map(([g, ms]) => `${g} ${ms.length}`).join(", ")}), each scored against the ClinGen expert classification of ${int(D.metadata.total_variants)} variants.`;
     $("lbTitle").textContent = `F1 score by expert classification and disease category, ${three ? "3-class" : "5-class"}`;
     $("lbSub").innerHTML = (three
-      ? "Macro F1 across P/LP, VUS and B/LB, in percent."
-      : "Macro F1 across the five ACMG classes, in percent.") +
-      ` The best value in each row is shaded in that model's colour.<span class="ui-hint"> Select a model name to open its confusion matrices.</span>`;
+      ? "Macro F1 against the ClinGen expert classification, across P/LP, VUS and B/LB, in percent."
+      : "Macro F1 against the ClinGen expert classification, across the five ACMG classes, in percent.") +
+      ` The best value in each row is shaded in that model's colour.${state.lbCols ? " Ranks and highlights are among the models shown." : ""}<span class="ui-hint"> Select a model name to open its confusion matrices.</span>`;
 
     renderLbScatter(cols);
     renderAgreeHeat();
@@ -1020,7 +910,7 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
       const rankedVals = order.filter(isFull).map((m) => r.get(m)).filter((v) => v != null);
       const bestVal = !rankedVals.length ? null : (r.low ? Math.min(...rankedVals) : Math.max(...rankedVals));
       const fmt = r.fmt || ((v) => f1(v));
-      const label = `<td class="lbt-first${r.indent ? " indent" : ""}"><span class="lbt-row">${r.abbr ? `<span class="lbt-abbr">${r.abbr}</span>` : ""}${esc(r.label)}${r.small ? `<sup class="lbt-dag"${tipAttr(`Fewer than ${SMALL_N} variants: interpret with caution`)}>†</sup>` : ""}</span></td>`;
+      const label = `<td class="lbt-first${r.indent ? " indent" : ""}"><span class="lbt-row">${r.abbr ? tierChip(r.abbr) : ""}${esc(r.label)}${r.small ? `<sup class="lbt-dag"${tipAttr(`Fewer than ${SMALL_N} variants: interpret with caution`)}>†</sup>` : ""}</span></td>`;
       const n = r.n != null
         ? `<td class="lbt-n${r.small ? " small" : ""}"><span class="lbt-nv">${int(r.n)}</span>${r.bar != null ? `<span class="lbt-nbar"><span style="width:${Math.max(2, r.bar * 100)}%"></span></span>` : ""}</td>`
         : `<td class="lbt-n"></td>`;
@@ -1145,18 +1035,19 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
     const cell = window.matchMedia("(max-width: 640px)").matches ? (five ? 44 : 64) : (five ? 52 : 72);
     const ylabH = mat.length * cell;
     const ylab = `<td class="cm-ylab" rowspan="${mat.length}"><svg width="16" height="${ylabH}" aria-hidden="true"><text transform="translate(12 ${ylabH / 2}) rotate(-90)" text-anchor="middle">Expert classification</text></svg></td>`;
-    const head = `<thead><tr><th colspan="2"></th><th class="cm-axt" colspan="${labels.length}">Model call</th></tr>` +
-      `<tr><th colspan="2"></th>${labels.map((l) => `<th class="colh">${l}</th>`).join("")}</tr></thead>`;
+    // Model calls run along the bottom, like an x axis: labels, then the axis title.
+    const foot = `<tfoot><tr><th colspan="2"></th>${labels.map((l, j) => `<th class="colh" scope="col"${tipAttr(full[j])}><span class="cm-lab">${esc(l)}</span></th>`).join("")}</tr>` +
+      `<tr><th colspan="2"></th><th class="cm-axt" colspan="${labels.length}">Model call</th></tr></tfoot>`;
     const body = mat.map((row, i) => {
       const sum = row.reduce((a, b) => a + b, 0);
-      return `<tr>${i === 0 ? ylab : ""}<td class="rowh">${labels[i]}</td>${row.map((v, j) => {
+      return `<tr>${i === 0 ? ylab : ""}<td class="rowh"${tipAttr(full[i])}><span class="cm-lab">${esc(labels[i])}</span></td>${row.map((v, j) => {
         const share = sum ? v / sum : 0;
         const x = (dirOf(i) === "p" && dirOf(j) === "b") || (dirOf(i) === "b" && dirOf(j) === "p");
         const shown = state.cmMode === "count" ? int(v) : (share * 100).toFixed(1);
         return `<td class="h${i === j ? " diag" : ""}${x && v > 0 ? " xdir" : ""}" style="${x && v > 0 ? "" : heatStyle(share)}"${tipAttr(`${fullName(m)}\nExpert: ${full[i]}\nModel: ${full[j]}\n${int(v)} variants, ${(share * 100).toFixed(1)}% of row${x && v > 0 ? "\nCross-direction error" : ""}`)}>${shown}</td>`;
       }).join("")}</tr>`;
     }).join("");
-    return `<div class="table-wrap"><table class="heat cm${five ? "" : " cm3"}" style="--cm-cell:${cell}px" aria-label="${esc(fullName(m))}: rows are the expert classification, columns the model call">${head}<tbody>${body}</tbody></table></div>`;
+    return `<div class="table-wrap"><table class="heat cm${five ? "" : " cm3"}" style="--cm-cell:${cell}px" aria-label="${esc(fullName(m))}: rows are the expert classification, columns the model call"><tbody>${body}</tbody>${foot}</table></div>`;
   }
 
   function renderConfusion() {
@@ -1164,36 +1055,66 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
     seg("cmModeSeg", state.cmMode, (v) => { state.cmMode = v; renderConfusion(); });
     $("cmSub").textContent = `${state.cmMode === "count" ? "Cells are variant counts, shaded by share of the row." : "Cells are the percentage of the row."} Red cells are cross-direction errors (B/LB called P/LP, or the reverse).`;
     renderShownPicker("cm");
-    $("cmLead").textContent = shownLead("cm", "One confusion matrix per model against the ClinGen expert classification.");
     const ms = shownModels("cm");
     $("cmGrid").innerHTML = ms.map((m) => `<div><p class="cm-title">${mname(m, ms)}</p>${confusionTable(m)}</div>`).join("");
   }
 
   // ---------- criteria ----------
-  function criteriaBars(el, list, ms) {
-    const share = (m, c) => (D.criteria_data[m.key] ? ((D.criteria_data[m.key][c] || 0) / (m.evaluated_count || 1)) * 100 : null);
-    let max = 0;
-    list.forEach(([c]) => ms.forEach((m) => (max = Math.max(max, share(m, c) || 0))));
-    const top = niceMax(max);
-    const ticks = [0, top / 4, top / 2, (3 * top) / 4, top].map((t) => +t.toFixed(1));
-    el.innerHTML = verticalBars(list.map(([c, def]) => ({
-      label: `<span class="mono">${c}</span>`, tip: `${c}: ${def}`,
-      bars: ms.map((m) => {
-        const v = share(m, c);
-        if (v == null) return { m, v: null, text: "no criteria recorded" };
-        const n = D.criteria_data[m.key][c] || 0;
-        return { m, v, text: v > 0 && v < 0.1 ? "<0.1" : v.toFixed(1), tip: `${c} · ${fullName(m)}\n${int(n)} variants, ${v.toFixed(1)}% of evaluated\n${def}` };
-      })
-    })), { max: top, ticks, unit: "%", width: el.clientWidth });
-  }
-
+  // Criteria down the side (grouped by evidence strength), models across (grouped
+  // by section, as on the leaderboard). Dot area is the share of evaluated variants
+  // citing the criterion, on one scale for both panels; rust for pathogenic
+  // evidence, green for benign.
+  const CG_R = 13;
   function renderCriteria() {
     renderShownPicker("crit");
-    $("critLead").textContent = shownLead("crit", "ACMG/AMP criteria each model cited in its classifications.");
-    const ms = shownModels("crit");
-    $("critLegend").innerHTML = ms.map((m) => `<span>${mname(m, ms)}</span>`).join("");
-    criteriaBars($("critPath"), CRITERIA.pathogenic, ms);
-    criteriaBars($("critBen"), CRITERIA.benign, ms);
+    const groups = bySection(shownModels("crit"));
+    const order = groups.flatMap(([, ms]) => ms);
+    const groupStart = new Set(groups.slice(1).map(([, ms]) => ms[0].key));
+    const gs = (m) => (groupStart.has(m.key) ? " lbt-gs" : "");
+    const share = (m, c) => (D.criteria_data[m.key] ? ((D.criteria_data[m.key][c] || 0) / (m.evaluated_count || 1)) * 100 : null);
+    const all = [...CRITERIA.pathogenic, ...CRITERIA.benign];
+    const max = Math.max(1, ...all.flatMap(([c]) => order.map((m) => share(m, c) || 0)));
+    const radius = (v) => (v > 0 ? Math.max(1.5, CG_R * Math.sqrt(v / max)) : 0);
+    const dot = (v, color) => {
+      const d = n2(2 * radius(v));
+      return `<span class="cg-dot-box">${d ? `<span class="cg-dot" style="width:${d}px;height:${d}px;background:${color}"></span>` : `<span class="cg-dot cg-zero"></span>`}</span>`;
+    };
+
+    const keys = [5, 10, 25, 50, 75].filter((k) => k <= max).slice(-3);
+    $("critKey").innerHTML = keys.map((k) => `<span>${dot(k, "var(--text-2)")}${k}%</span>`).join("");
+
+    const table = $("critGrid");
+    if (!order.length) { table.innerHTML = `<tbody><tr><td class="empty">No models selected.</td></tr></tbody>`; return; }
+    const span = order.length + 1;
+    const head = `<thead><tr class="lbt-groups"><th class="lbt-first"></th>${groups.map(([g, ms, k], i) => `<th colspan="${ms.length}" class="lbt-group${i ? " lbt-gs" : ""}"${tipAttr(SECTION_TIP[k])}>${esc(g)}</th>`).join("")}</tr>` +
+      `<tr><th class="lbt-first">Criterion</th>${order.map((m) => `<th class="lbt-model${gs(m)}"${tipAttr(fullName(m))}><span class="lbt-label">${swatch(m)}${esc(m.short_name)}</span><br><span class="lbt-meta">${esc(providerOf(m))}</span></th>`).join("")}</tr></thead>`;
+
+    const draw = (compact) => {
+      const body = [["Pathogenic evidence", CRITERIA.pathogenic, "var(--tier-p)"], ["Benign evidence", CRITERIA.benign, "var(--tier-b)"]].map(([title, list, color]) => {
+        let rows = `<tr class="lbt-sec"><td class="lbt-first" colspan="${span}">${title}</td></tr>`;
+        let strength = null;
+        list.forEach(([c, def, short]) => {
+          if (strengthOf(c) !== strength) {
+            strength = strengthOf(c);
+            rows += `<tr class="cg-str"><td class="lbt-first" colspan="${span}">${strength}</td></tr>`;
+          }
+          rows += `<tr><td class="lbt-first cg-label"${tipAttr(`${c}: ${def}`)}><span class="cg-code mono">${c}</span> <span class="cg-def">${esc(short)}</span></td>${order.map((m) => {
+            const v = share(m, c);
+            if (v == null) return `<td class="cg-c na${gs(m)}"${tipAttr(`${fullName(m)}: no criteria recorded`)}>—</td>`;
+            const n = D.criteria_data[m.key][c] || 0;
+            const txt = v === 0 ? "" : v < 0.1 ? "<0.1" : v.toFixed(1);
+            return `<td class="cg-c${gs(m)}"${tipAttr(`${c} · ${fullName(m)}\n${int(n)} variants, ${v.toFixed(1)}% of evaluated\n${def}`)}><span class="cg-cell">${dot(v, color)}${compact ? "" : `<span class="cg-v">${txt}</span>`}</span></td>`;
+          }).join("")}</tr>`;
+        });
+        return rows;
+      }).join("");
+      table.innerHTML = head + `<tbody>${body}</tbody>`;
+      table.classList.toggle("compact", compact);
+    };
+    // Values print beside the dots when the grid fits; otherwise they show on hover.
+    draw(false);
+    const wrap = table.parentElement;
+    if (wrap.scrollWidth > wrap.clientWidth + 1) draw(true);
   }
 
   // ---------- agreement (leaderboard) ----------
@@ -1313,37 +1234,15 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
   }
 
   function renderAll() {
-    applyThemeColors();
     renderChrome();
     pruneShown();
     setTab(state.tab);
-    state.ready = true;
-  }
-
-  // ---------- theme ----------
-  function setupTheme() {
-    const order = ["system", "light", "dark"];
-    let cur = "system";
-    try { cur = localStorage.getItem("aiva-theme") || "system"; } catch (_) { /* storage unavailable */ }
-    const apply = () => {
-      if (cur === "system") delete document.documentElement.dataset.theme;
-      else document.documentElement.dataset.theme = cur;
-      $("themeBtn").textContent = "Theme: " + cur[0].toUpperCase() + cur.slice(1);
-      if (state.ready) rerenderForTheme();
-    };
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (cur === "system" && state.ready) rerenderForTheme(); });
-    $("themeBtn").onclick = () => {
-      cur = order[(order.indexOf(cur) + 1) % order.length];
-      try { localStorage.setItem("aiva-theme", cur); } catch (_) { /* storage unavailable */ }
-      apply();
-    };
-    apply();
   }
 
   // ---------- figure export (SVG / TIFF) ----------
   // Each figure card is redrawn as plain SVG primitives from its rendered
   // layout (boxes, circles, text), so the SVG stays editable in vector tools.
-  // Exports always use the light theme on a white background.
+  // Exports render on a white background.
   const EXPORT_IGNORE = ".fig-export, .ui-hint, .controls, .seg, select, input, label.field";
   const colorCache = new Map();
   const colorCtx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
@@ -1545,12 +1444,7 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
 
   function withLightLayout(card, fn) {
     const html = document.documentElement;
-    const prevTheme = html.dataset.theme;
-    html.dataset.theme = "light";
     html.classList.add("exporting-root");
-    html.classList.add("exporting-root");
-    // Colours that depend on the theme are computed while rendering.
-    if (prevTheme !== "light") rerenderForTheme();
     // Let wide tables lay out at full width instead of scrolling.
     const prevWidth = card.style.width;
     const extra = Math.max(0, ...[...card.querySelectorAll(".table-wrap")].map((w) => w.scrollWidth - w.clientWidth));
@@ -1560,8 +1454,6 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
       card.classList.remove("exporting");
       html.classList.remove("exporting-root");
       card.style.width = prevWidth;
-      if (prevTheme) html.dataset.theme = prevTheme; else delete html.dataset.theme;
-      if (prevTheme !== "light") rerenderForTheme();
     }
   }
 
@@ -1727,7 +1619,7 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
 
   function figureName(card) {
     const parts = ["aiva-rare-bench", card.querySelector(".card-head h3").textContent];
-    const p = card.querySelector("#cmGrid") ? "cm" : card.querySelector("#critPath") ? "crit" : null;
+    const p = card.querySelector("#cmGrid") ? "cm" : card.querySelector("#critGrid") ? "crit" : null;
     if (p && state[SHOWN[p].col]) parts.push(shownModels(p).map((m) => m.short_name).join(" vs "));
     if (card.querySelector("#cmGrid")) parts.push(state.cmScale + "-class", state.cmMode === "count" ? "counts" : "row-pct");
     if (card.querySelector("#agreeHeat")) parts.push(state.agree === "exact_pct" ? "exact" : "directional");
@@ -1761,7 +1653,7 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
         <button type="button" role="menuitem" data-fmt="svg">SVG (vector)</button>
         <button type="button" role="menuitem" data-fmt="tiff" data-dpi="300">TIFF, 300 dpi</button>
         <button type="button" role="menuitem" data-fmt="tiff" data-dpi="600">TIFF, 600 dpi</button>
-        <div class="menu-note">Light theme, white background</div></div>`;
+        <div class="menu-note">White background</div></div>`;
       menu.querySelectorAll("button").forEach((b) => b.onclick = () => {
         menu.open = false;
         exportFigure(card, b.dataset.fmt, +b.dataset.dpi || 300);
@@ -1781,7 +1673,6 @@ window.BENCHMARK_DATA = {"metadata":{"title":"AIVA Rare Bench","subtitle":"Anthr
   let resizeT;
   window.addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if (RENDER[state.tab]) RENDER[state.tab](); }, 150); });
 
-  setupTheme();
   setupExport();
   setupLbScatter();
   Object.keys(SHOWN).forEach(setupShownPicker);

@@ -3,6 +3,12 @@
 `index.html` is a self-contained page: open it directly, serve it with
 GitHub Pages, or run the local server for editing.
 
+`index.html` is generated, so do not edit it by hand. Make page changes in
+`template.html`, then run `python3 dashboard/generate_html.py`, which fills the
+template's placeholders (`__FONT_FACES__`, `__MAMIDI_LOGO__`, `__MAMIDI_ICON__`,
+`__BENCHMARK_DATA__`) and writes `index.html`. Edits made only to `index.html`
+are lost the next time it is generated.
+
 Two sections: **Variant Classification** (everything below) and **Variant
 Ranking** (`#ranking`, an empty state until ranking results are added).
 
