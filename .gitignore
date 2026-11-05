@@ -1,0 +1,75 @@
+# ─── Python ───
+*.pyc
+__pycache__
+venv/
+.venv/
+.env
+
+# ─── OS / editor junk ───
+.DS_Store
+*.bak
+*.tmp
+
+# ─── Data dumps: JSON/CSV are ignored except the benchmark files below ───
+*.json
+*.jsonl
+*.csv
+
+# ─── Benchmark data and results, one tree per benchmark (classification, ranking) ───
+!data/*/*.jsonl
+!data/*/*.json
+!results/*/**/*.jsonl
+!results/*/**/*.json
+!dashboard/data/*.json
+results/classification/Results_Claude_Sonnet_5_5_Analysis_rerun/partial_1454/
+
+# ─── Ad-hoc runs (config.RESULTS_DIR) ───
+scratch/
+
+# ─── Large database archives & tables ───
+*.tar
+*.tar.gz
+data/bias_v3_tables/
+
+# ─── Logs & ad-hoc debug output ───
+*.log
+*.pid
+/nohup.out
+/log*
+/debug_*
+
+# ─── Manuscripts / office docs ───
+*.docx
+
+# ─── Scratch / throwaway directories ───
+_trash/
+Simulated_Datasets/
+
+# ─── Root scratch notes & one-off scripts (not part of repo structure) ───
+/Explaination
+/IMPROVEMENTS_SUMMARY.md
+/METHODS.md
+/NEW_WORKFLOW_README.md
+/REFACTORING_COMPLETE.md
+/analyze_disease_ids.py
+/check_corruption_overlap.py
+/check_keys.txt
+/corruption_overlap_results.txt
+
+# ─── Experimental scripts (not part of the core pipeline) ───
+scripts/build_fixed_prompt_inputs.py
+scripts/classify_final_extracted.py
+scripts/classify_simulated.py
+scripts/compute_final_extracted_metrics.py
+scripts/compute_kg_benchmark.py
+scripts/index_benchmark.py
+scripts/plot_final_extracted_metrics.py
+scripts/recover_from_traces.py
+scripts/sample_by_category.py
+
+# ─── Misplaced / duplicate figure exports under the Gemini Pro run ───
+results/classification/Results_Gemini_Pro_Analysis/other_models/
+results/classification/Results_Gemini_Pro_Analysis/figures/*.png
+results/classification/Results_Gemini_Pro_Analysis/figures/*.pdf
+results/classification/Results_Gemini_Pro_Analysis/figures/pdf/*.png
+results/classification/Results_Gemini_Pro_Analysis/figures/png/*.pdf

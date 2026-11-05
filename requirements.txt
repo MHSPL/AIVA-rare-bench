@@ -1,0 +1,8 @@
+# Classification (AIVA API client)
+httpx>=0.25.0
+python-dotenv>=1.0.0
+
+# Metrics & figure generation (scripts/generate_results.py, benchmark_analysis.py)
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
