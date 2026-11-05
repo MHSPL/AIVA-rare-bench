@@ -9,8 +9,14 @@ template's placeholders (`__FONT_FACES__`, `__MAMIDI_LOGO__`, `__MAMIDI_ICON__`,
 `__BENCHMARK_DATA__`) and writes `index.html`. Edits made only to `index.html`
 are lost the next time it is generated.
 
-Two sections: **Variant Classification** (everything below) and **Variant
-Ranking** (`#ranking`, an empty state until ranking results are added).
+Three sections: **Overall** (`#overall`), **Variant Classification**
+(everything below) and **Variant Ranking** (`#ranking`, an empty state until
+ranking results are added).
+
+**Overall** is the landing page and a snapshot of each benchmark: the
+classification leaderboard cut to its Overall, P/LP, VUS and B/LB rows
+(3-class, every model, no model links or filters), with a placeholder card
+where the ranking snapshot will go.
 
 Variant Classification has three tabs:
 

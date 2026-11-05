@@ -77,6 +77,7 @@ def main():
     assets = REPO_ROOT / "dashboard" / "assets"
     html = html.replace("__MAMIDI_LOGO__", data_uri(assets / "mamidi-logo.png", "image/png"))
     html = html.replace("__MAMIDI_ICON__", data_uri(assets / "mamidi-icon.png", "image/png"))
+    html = html.replace("__MAMIDI_WORDMARK__", data_uri(assets / "mamidi-logo-name.png", "image/png"))
     html = html.replace("__BENCHMARK_DATA__", to_script_json(data))
 
     HTML_OUT.write_text(html, encoding="utf-8")

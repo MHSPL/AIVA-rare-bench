@@ -41,7 +41,9 @@
 }
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+/* No elastic overscroll: on macOS it pulls the page past its edges and shows
+   the beige page colour above the green header. */
+html { -webkit-text-size-adjust: 100%; overscroll-behavior-y: none; }
 body {
   margin: 0;
   background: var(--page);
@@ -61,7 +63,7 @@ button, input, select { font: inherit; color: inherit; }
 @media (min-width: 768px) { .wrap { padding: 0 32px; } }
 
 /* Header: the green bar holds the benchmark tabs (centred) and system buttons */
-.app-header {
+.app-header, .site-footer {
   --bar: #134734; --bar-ink: #f1e9dd; --bar-ink-2: rgba(241, 233, 221, 0.72);
   --bar-line: rgba(241, 233, 221, 0.28); --bar-accent: #ea7a42;
   background: var(--bar); color: var(--bar-ink);
@@ -253,8 +255,35 @@ table.cm td.rowh { text-align: right; padding-right: 8px; }
 .btn:disabled { opacity: 0.5; cursor: default; }
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--surface); padding: 9px 14px; border-radius: 8px; font-size: 14px; z-index: 110; max-width: calc(100vw - 32px); }
 
-footer { color: var(--muted); font-size: 13px; padding-top: 24px; }
-footer:empty { display: none; }
+.page-note { margin: 0; color: var(--muted); font-size: 13px; padding-top: 24px; }
+.page-note:empty { display: none; }
+
+/* Site footer: the company footer from mamidi.ai, plus the benchmark's provenance */
+.site-footer :focus-visible { outline-color: var(--bar-ink); }
+.sf-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr); gap: 32px 40px; padding: 48px 0 32px; }
+.site-footer h3 { margin: 0 0 14px; font-size: 16px; font-weight: 600; color: var(--bar-ink); }
+.site-footer p, .site-footer li { font-size: 14px; color: var(--bar-ink-2); }
+.site-footer p { margin: 0; }
+.site-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.site-footer a { color: var(--bar-ink-2); text-decoration: none; transition: color 0.15s; }
+.site-footer a:hover { color: var(--bar-accent); }
+.sf-brand .sf-mail { color: var(--bar-ink); }
+.sf-logo { display: inline-block; margin-bottom: 16px; padding: 10px 12px; background: #ffffff; border-radius: 8px; }
+.sf-logo img { display: block; height: 40px; width: auto; }
+.sf-brand p { max-width: 36ch; margin-bottom: 14px; }
+.sf-mail { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+.sf-mail svg { color: var(--bar-accent); flex-shrink: 0; }
+.sf-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 24px 0 32px; border-top: 1px solid rgba(241, 233, 221, 0.12); }
+.sf-bottom p, .sf-bottom a { font-size: 14px; color: rgba(241, 233, 221, 0.6); }
+.sf-legal { display: flex; gap: 24px; }
+.sf-cta p { margin-bottom: 16px; }
+.site-footer a.sf-btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px;
+  background: #d55b1f; color: #ffffff; font-size: 15px; font-weight: 600; transition: background-color 0.15s;
+}
+.site-footer a.sf-btn:hover { background: color-mix(in srgb, #d55b1f 90%, #000); color: #ffffff; }
+@media (max-width: 900px) { .sf-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sf-brand { grid-column: 1 / -1; } }
+@media (max-width: 560px) { .sf-grid { grid-template-columns: minmax(0, 1fr); padding-top: 36px; } }
 .card-head > .legend { order: 10; flex-basis: 100%; }
 .card-head > .fig-export { margin-left: auto; }
 .card-head > .controls + .fig-export, .card-head > .seg + .fig-export, .card-head > .field + .fig-export { margin-left: 0; }
@@ -262,8 +291,11 @@ footer:empty { display: none; }
 
 /* Leaderboard landing */
 
-/* Ranking section hides the classification chrome */
-body[data-section="ranking"] .tab-bar, body[data-section="ranking"] .cls-only, body[data-section="ranking"] footer { display: none; }
+/* Overall and Ranking sections hide the classification chrome */
+body[data-section="ranking"] .tab-bar, body[data-section="ranking"] .cls-only, body[data-section="ranking"] #archivedNote,
+body[data-section="overall"] .tab-bar, body[data-section="overall"] .cls-only { display: none; }
+.ov-link { appearance: none; border: 0; background: none; padding: 0; color: var(--accent); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.ov-link:hover { color: color-mix(in srgb, var(--accent) 80%, #000); }
 .rank-empty { padding: 48px 24px; text-align: center; }
 .rank-empty h3 { margin: 0; font-size: 19px; font-weight: 700; }
 .rank-empty p { margin: 6px auto 0; color: var(--text-2); max-width: 52ch; }
@@ -342,7 +374,8 @@ th.lbt-group::after { content: ""; display: block; height: 2px; margin: 4px 6px 
 th.lbt-nh { text-align: right; font-size: 13px; font-weight: 600; color: var(--text-2); min-width: 84px; }
 table.lbt th.lbt-model { text-align: center; min-width: 76px; max-width: 120px; white-space: normal; }
 .lbt-name { appearance: none; border: 0; background: none; padding: 0; font: inherit; color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; }
-.lbt-name:hover .lbt-label { text-decoration: underline; text-underline-offset: 3px; }
+button.lbt-name:hover .lbt-label { text-decoration: underline; text-underline-offset: 3px; }
+.lbt-name.lbt-static { cursor: default; }
 .lbt-rank { font-size: 12px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
 .lbt-label { font-size: 13px; font-weight: 650; line-height: 1.3; text-align: center; white-space: normal; overflow-wrap: anywhere; }
 .lbt-label .swatch { margin-right: 4px; }
@@ -456,6 +489,7 @@ th.selcol { color: var(--text); }
       <h1>AIVA Rare Bench</h1>
     </div>
     <nav class="sections" role="tablist" aria-label="Benchmarks">
+      <button class="section-tab" role="tab" type="button" data-section="overall">Overall</button>
       <button class="section-tab" role="tab" type="button" data-section="classification">Classification</button>
       <button class="section-tab" role="tab" type="button" data-section="ranking">Ranking</button>
     </nav>
@@ -520,6 +554,25 @@ th.selcol { color: var(--text); }
 </div>
 
 <main class="wrap">
+
+  <!-- OVERALL: a snapshot of each benchmark -->
+  <section class="view" id="view-overall" role="tabpanel" hidden>
+    <h2 class="sr-only">Overall</h2>
+    <div class="card fig-main lb-card" data-static>
+      <div class="card-head">
+        <div>
+          <h3>Variant classification: F1 score by expert classification, 3-class</h3>
+          <p id="ovSub"></p>
+        </div>
+      </div>
+      <div class="table-wrap"><table id="ovTable" class="lbt"></table></div>
+      <p class="note" id="ovNote"></p>
+    </div>
+    <div class="card rank-empty" data-static>
+      <h3>Variant ranking</h3>
+      <p>A snapshot of the ranking results will appear here once they are added to the repository.</p>
+    </div>
+  </section>
 
   <!-- LEADERBOARD -->
   <section class="view" id="view-leaderboard" role="tabpanel">
@@ -594,8 +647,40 @@ th.selcol { color: var(--text); }
     </div>
   </section>
 
-  <footer id="footer"></footer>
+  <p class="page-note" id="archivedNote"></p>
 </main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="sf-grid">
+      <div class="sf-brand">
+        <a class="sf-logo" href="https://mamidi.ai/" target="_blank" rel="noopener"><img src="__MAMIDI_WORDMARK__" alt="Mamidi Health" width="160" height="40"></a>
+        <p>AI-powered genetic disease interpretation that's faster, more accurate, and affordable.</p>
+        <a class="sf-mail" href="mailto:tarun@mamidi.ai"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>tarun@mamidi.ai</a>
+      </div>
+      <div>
+        <h3>Quick Links</h3>
+        <ul>
+          <li><a href="https://mamidi.ai/" target="_blank" rel="noopener">Home</a></li>
+          <li><a href="https://mamidi.ai/blogs" target="_blank" rel="noopener">Blog</a></li>
+          <li><a href="https://mamidi.ai/contact" target="_blank" rel="noopener">Contact</a></li>
+        </ul>
+      </div>
+      <div class="sf-cta">
+        <h3>Try AIVA</h3>
+        <p>Run AIVA on your own variants.</p>
+        <a class="sf-btn" href="https://chat.aivaportal.com" target="_blank" rel="noopener">Try AIVA Live <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+    <div class="sf-bottom">
+      <p>&copy; <span id="sfYear">2026</span> Mamidi Health LLC. All rights reserved.</p>
+      <nav class="sf-legal" aria-label="Legal">
+        <a href="https://mamidi.ai/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>
+        <a href="https://mamidi.ai/terms-of-service" target="_blank" rel="noopener">Terms of Service</a>
+      </nav>
+    </div>
+  </div>
+</footer>
 
 
 <div id="tip" hidden></div>
@@ -655,7 +740,7 @@ window.BENCHMARK_DATA = __BENCHMARK_DATA__;
   const tierChip = (abbr) => `<span class="tier tier-${TIER_OF[abbr]}">${esc(abbr)}</span>`;
 
   const state = {
-    tab: "leaderboard", clsTab: "leaderboard",
+    tab: "overall", clsTab: "leaderboard",
     scatterScale: "3", lbScale: "3", lbCols: null,
     cmCols: null, critCols: null,
     cmScale: "5", cmMode: "count",
@@ -723,9 +808,10 @@ window.BENCHMARK_DATA = __BENCHMARK_DATA__;
 
   // ---------- footer ----------
   function renderChrome() {
-    // The footer only appears when a model is carried over from an earlier build.
+    $("sfYear").textContent = String(new Date().getFullYear());
+    // The note under the figures only appears when a model is carried over from an earlier build.
     const archived = D.models.filter((m) => m.archived);
-    $("footer").innerHTML = archived.length ? `${archived.map((m) => esc(m.name)).join(" and ")} ${archived.length > 1 ? "are" : "is"} carried over from an earlier build because the raw results are not in this repository; variant-level comparisons with later runs are unavailable for ${archived.length > 1 ? "them" : "it"}.` : "";
+    $("archivedNote").innerHTML = archived.length ? `${archived.map((m) => esc(m.name)).join(" and ")} ${archived.length > 1 ? "are" : "is"} carried over from an earlier build because the raw results are not in this repository; variant-level comparisons with later runs are unavailable for ${archived.length > 1 ? "them" : "it"}.` : "";
   }
 
   // ---------- model selection ----------
@@ -841,28 +927,41 @@ window.BENCHMARK_DATA = __BENCHMARK_DATA__;
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !pop.hidden) { close(); btn.focus(); } });
   }
 
-  function renderLeaderboard() {
-    renderShownPicker("lb");
-    seg("lbScaleSeg", state.lbScale, (v) => { state.lbScale = v; renderLeaderboard(); writeHash(); });
-    // One scale for every leaderboard figure: table, scatter and agreement heatmap.
-    state.scatterScale = state.lbScale;
-    state.agree = state.lbScale === "5" ? "exact_pct" : "dir_pct";
-    const three = state.lbScale === "3";
-    const overallKey = three ? "macro_f1_3" : "macro_f1_5";
-    const visible = lbShown();
-    const ranked = visible.filter(isFull).sort((a, b) => b[overallKey] - a[overallKey]);
-    const partial = visible.filter((m) => !isFull(m)).sort((a, b) => b[overallKey] - a[overallKey]);
-    const cols = [...ranked, ...partial];
-    $("lbTitle").textContent = `F1 score by expert classification and disease category, ${three ? "3-class" : "5-class"}`;
-    $("lbSub").innerHTML = (three
-      ? "Macro F1 against the ClinGen expert classification, across P/LP, VUS and B/LB, in percent."
-      : "Macro F1 against the ClinGen expert classification, across the five ACMG classes, in percent.") +
-      ` The best value in each row is shaded in that model's colour.${state.lbCols ? " Ranks and highlights are among the models shown." : ""}<span class="ui-hint"> Select a model name to open its confusion matrices.</span>`;
+  // ---------- leaderboard table (shared by the Overall tab and the Leaderboard tab) ----------
+  const LB_SMALL_N = 100;
+  const overallKeyOf = (three) => (three ? "macro_f1_3" : "macro_f1_5");
 
-    renderLbScatter(cols);
-    renderAgreeHeat();
+  // Columns: ranked models (near-full coverage) by overall F1, then partial runs.
+  function lbColumns(models, three) {
+    const k = overallKeyOf(three);
+    const ranked = models.filter(isFull).sort((a, b) => b[k] - a[k]);
+    const partial = models.filter((m) => !isFull(m)).sort((a, b) => b[k] - a[k]);
+    return { ranked, partial, cols: [...ranked, ...partial] };
+  }
 
-    if (!cols.length) { $("lbTable").innerHTML = `<tbody><tr><td class="empty">No models selected.</td></tr></tbody>`; return; }
+  // The Overall row followed by one row per expert class (P/LP, VUS, B/LB or the five ACMG classes).
+  function lbClassRows(cols, three) {
+    const overallKey = overallKeyOf(three);
+    const classRows = three
+      ? [["pathogenic", "P/LP", "Pathogenic or likely pathogenic"], ["vus", "VUS", "Uncertain significance"], ["benign", "B/LB", "Benign or likely benign"]]
+          .map(([k, abbr, label]) => ({ label, abbr, n: (cols[0].per_class_3[k] || {}).support, get: (m) => (m.per_class_3 || {})[k]?.f1, f1: true, indent: true }))
+      : LABELS.map((l) => ({ label: l, abbr: ABBR[l], n: (cols[0].per_class_5[l] || {}).support, get: (m) => (m.per_class_5 || {})[l]?.f1, f1: true, indent: true }));
+    const overall = { label: "Overall", n: D.metadata.total_variants, get: (m) => m[overallKey], f1: true, strong: true };
+    return [overall, ...classRows];
+  }
+
+  // Notes on partial runs and models that skipped variants.
+  function lbCoverageNotes(ranked, partial) {
+    return [
+      partial.length ? `* ${partial.map((m) => esc(m.short_name)).join(", ")} ${partial.length > 1 ? "were" : "was"} scored on part of the cohort, so ${partial.length > 1 ? "they are" : "it is"} not ranked and not eligible for best-in-row.` : "",
+      ranked.filter((m) => !isComplete(m)).map((m) => `${esc(m.short_name)} returned no call for ${int(m.total_cohort - m.evaluated_count)} variant${m.total_cohort - m.evaluated_count === 1 ? "" : "s"}; it is ranked on the ${int(m.evaluated_count)} it classified.`).join("<br>")
+    ];
+  }
+
+  // Measures down the side, models across grouped by section. sections: [title or null, rows].
+  // With links, each model name opens that model's confusion matrices.
+  function drawLbTable(table, cols, ranked, sections, links = true) {
+    if (!cols.length) { table.innerHTML = `<tbody><tr><td class="empty">No models selected.</td></tr></tbody>`; return; }
 
     // Columns grouped by section, in rank order within each
     const groups = bySection(cols);
@@ -870,39 +969,20 @@ window.BENCHMARK_DATA = __BENCHMARK_DATA__;
     const groupStart = new Set(groups.slice(1).map(([, ms]) => ms[0].key));
     const gs = (m) => (groupStart.has(m.key) ? " lbt-gs" : "");
     const rankOf = (m) => (isFull(m) ? ranked.indexOf(m) + 1 : null);
-    const SMALL_N = 100;
-
-    // Rows: F1 rows are shaded on one shared scale; other measures are not
-    const catKey = three ? "macro_f1_3" : "macro_f1";
-    const classRows = three
-      ? [["pathogenic", "P/LP", "Pathogenic or likely pathogenic"], ["vus", "VUS", "Uncertain significance"], ["benign", "B/LB", "Benign or likely benign"]]
-          .map(([k, abbr, label]) => ({ label, abbr, n: (cols[0].per_class_3[k] || {}).support, get: (m) => (m.per_class_3 || {})[k]?.f1, f1: true, indent: true }))
-      : LABELS.map((l) => ({ label: l, abbr: ABBR[l], n: (cols[0].per_class_5[l] || {}).support, get: (m) => (m.per_class_5 || {})[l]?.f1, f1: true, indent: true }));
-    const cats = categoriesWithData().sort((a, b) => catCount(b) - catCount(a));
-    const maxCat = Math.max(1, ...cats.map(catCount));
-    const catRows = cats.map((c) => ({
-      label: c, n: catCount(c), bar: catCount(c) / maxCat, small: catCount(c) < SMALL_N, f1: true,
-      get: (m) => { const r = (D.categories_data[m.key] || {})[c]; return r && r.count ? r[catKey] : null; }
-    }));
-    const safetyRows = [
-      { label: "Cross-direction errors per 1,000 variants", get: per1k, low: true, fmt: (v) => v.toFixed(2) }
-    ];
-    const overall = { label: "Overall", n: D.metadata.total_variants, get: (m) => m[overallKey], f1: true, strong: true };
-    const sections = [
-      ["By expert classification", [overall, ...classRows]],
-      ["By disease category (ClinGen expert panel)", catRows],
-      ["Safety", safetyRows]
-    ];
-
+    const SMALL_N = LB_SMALL_N;
 
     const groupHead = `<tr class="lbt-groups"><th class="lbt-first" colspan="2"></th>${groups.map(([g, ms, k], i) => `<th colspan="${ms.length}" class="lbt-group${i ? " lbt-gs" : ""}"${tipAttr(SECTION_TIP[k])}>${esc(g)}</th>`).join("")}</tr>`;
     const head = `<thead>${groupHead}<tr><th class="lbt-first">Measure</th><th class="lbt-nh">Variants</th>${order.map((m) => {
       const r = rankOf(m);
-      return `<th class="lbt-model${gs(m)}"><button type="button" class="lbt-name" data-key="${esc(m.key)}"${tipAttr(`${fullName(m)}\n${sectionLabel(m)} · ${groupOf(m)}${isComplete(m) ? "" : `\nScored on ${int(m.evaluated_count)} of ${int(m.total_cohort)} variants${isFull(m) ? "" : "; not ranked"}`}\nSelect to open its analysis`)}>
+      // Name, then provider and method (e.g. "Anthropic · AIVA agent"); the column group already shows the section
+      const tip = tipAttr(`${m.name}\n${[providerOf(m), m.type].filter(Boolean).join(" · ")}${isComplete(m) ? "" : `\nScored on ${int(m.evaluated_count)} of ${int(m.total_cohort)} variants${isFull(m) ? "" : "; not ranked"}`}${links ? "\nSelect to open its analysis" : ""}`);
+      const inner = `
         <span class="lbt-rank">${r ? "#" + r : "not ranked"}</span>
         <span class="lbt-label">${swatch(m)}${esc(m.short_name)}${isFull(m) ? "" : "*"}</span>
-        <span class="lbt-meta">${esc(providerOf(m))}${isComplete(m) ? "" : ` · n=${int(m.evaluated_count)}`}</span>
-      </button></th>`;
+        <span class="lbt-meta">${esc(providerOf(m))}${isComplete(m) ? "" : ` · n=${int(m.evaluated_count)}`}</span>`;
+      return `<th class="lbt-model${gs(m)}">${links
+        ? `<button type="button" class="lbt-name" data-key="${esc(m.key)}"${tip}>${inner}</button>`
+        : `<div class="lbt-name lbt-static"${tip}>${inner}</div>`}</th>`;
     }).join("")}</tr></thead>`;
 
     const rowHtml = (r) => {
@@ -923,15 +1003,61 @@ window.BENCHMARK_DATA = __BENCHMARK_DATA__;
       }).join("")}</tr>`;
     };
     const span = order.length + 2;
-    const body = sections.map(([title, rows]) => `<tr class="lbt-sec"><td class="lbt-first" colspan="${span}">${title}</td></tr>` + rows.map(rowHtml).join("")).join("");
-    $("lbTable").innerHTML = head + `<tbody>${body}</tbody>`;
-    $("lbTable").querySelectorAll(".lbt-name").forEach((b) => b.onclick = () => openAnalysis(b.dataset.key));
+    const body = sections.map(([title, rows]) => (title ? `<tr class="lbt-sec"><td class="lbt-first" colspan="${span}">${title}</td></tr>` : "") + rows.map(rowHtml).join("")).join("");
+    table.innerHTML = head + `<tbody>${body}</tbody>`;
+    table.querySelectorAll(".lbt-name").forEach((b) => b.onclick = () => openAnalysis(b.dataset.key));
+  }
+
+  function renderLeaderboard() {
+    renderShownPicker("lb");
+    seg("lbScaleSeg", state.lbScale, (v) => { state.lbScale = v; renderLeaderboard(); writeHash(); });
+    // One scale for every leaderboard figure: table, scatter and agreement heatmap.
+    state.scatterScale = state.lbScale;
+    state.agree = state.lbScale === "5" ? "exact_pct" : "dir_pct";
+    const three = state.lbScale === "3";
+    const { ranked, partial, cols } = lbColumns(lbShown(), three);
+    $("lbTitle").textContent = `F1 score by expert classification and disease category, ${three ? "3-class" : "5-class"}`;
+    $("lbSub").innerHTML = (three
+      ? "Macro F1 against the ClinGen expert classification, across P/LP, VUS and B/LB, in percent."
+      : "Macro F1 against the ClinGen expert classification, across the five ACMG classes, in percent.") +
+      ` The best value in each row is shaded in that model's colour.${state.lbCols ? " Ranks and highlights are among the models shown." : ""}<span class="ui-hint"> Select a model name to open its confusion matrices.</span>`;
+
+    renderLbScatter(cols);
+    renderAgreeHeat();
+
+    if (!cols.length) { drawLbTable($("lbTable"), cols, ranked, []); $("lbNote").innerHTML = ""; return; }
+
+    // Rows: F1 rows are shaded on one shared scale; other measures are not
+    const catKey = three ? "macro_f1_3" : "macro_f1";
+    const cats = categoriesWithData().sort((a, b) => catCount(b) - catCount(a));
+    const maxCat = Math.max(1, ...cats.map(catCount));
+    const catRows = cats.map((c) => ({
+      label: c, n: catCount(c), bar: catCount(c) / maxCat, small: catCount(c) < LB_SMALL_N, f1: true,
+      get: (m) => { const r = (D.categories_data[m.key] || {})[c]; return r && r.count ? r[catKey] : null; }
+    }));
+    const safetyRows = [
+      { label: "Cross-direction errors per 1,000 variants", get: per1k, low: true, fmt: (v) => v.toFixed(2) }
+    ];
+    drawLbTable($("lbTable"), cols, ranked, [
+      ["By expert classification", lbClassRows(cols, three)],
+      ["By disease category (ClinGen expert panel)", catRows],
+      ["Safety", safetyRows]
+    ]);
     $("lbNote").innerHTML = [
-      partial.length ? `* ${partial.map((m) => esc(m.short_name)).join(", ")} ${partial.length > 1 ? "were" : "was"} scored on part of the cohort, so ${partial.length > 1 ? "they are" : "it is"} not ranked and not eligible for best-in-row.` : "",
-      ranked.filter((m) => !isComplete(m)).map((m) => `${esc(m.short_name)} returned no call for ${int(m.total_cohort - m.evaluated_count)} variant${m.total_cohort - m.evaluated_count === 1 ? "" : "s"}; it is ranked on the ${int(m.evaluated_count)} it classified.`).join("<br>"),
-      cats.some((c) => catCount(c) < SMALL_N) ? `† Fewer than ${SMALL_N} variants; F1 on small categories varies widely.` : "",
+      ...lbCoverageNotes(ranked, partial),
+      cats.some((c) => catCount(c) < LB_SMALL_N) ? `† Fewer than ${LB_SMALL_N} variants; F1 on small categories varies widely.` : "",
       "Cross-direction errors: a benign or likely benign variant called pathogenic or likely pathogenic, or the reverse."
     ].filter(Boolean).join("<br>");
+  }
+
+  // ---------- overall ----------
+  // A snapshot of each benchmark. Classification: every model, 3-class, Overall plus P/LP, VUS and B/LB.
+  function renderOverall() {
+    const { ranked, partial, cols } = lbColumns(D.models.slice(), true);
+    $("ovSub").innerHTML = `Macro F1 against the ClinGen expert classification, across P/LP, VUS and B/LB, in percent, for all ${D.models.length} models. The best value in each row is shaded in that model's colour.<span class="ui-hint"> <button type="button" class="ov-link" id="ovFull">See the full leaderboard</button> for disease categories, safety and model filters.</span>`;
+    $("ovFull").onclick = () => { state.lbCols = null; state.lbScale = "3"; setTab("leaderboard"); window.scrollTo({ top: 0 }); };
+    drawLbTable($("ovTable"), cols, ranked, [[null, cols.length ? lbClassRows(cols, true) : []]], false);
+    $("ovNote").innerHTML = lbCoverageNotes(ranked, partial).filter(Boolean).join("<br>");
   }
 
   // Accuracy against safety: score across, cross-direction errors up (inverted).
@@ -1184,14 +1310,16 @@ window.BENCHMARK_DATA = __BENCHMARK_DATA__;
     leaderboard: renderLeaderboard,
     confusion: renderConfusion,
     criteria: renderCriteria,
+    overall: renderOverall,
     ranking: () => {}
   };
-  const sectionOf = (tab) => (tab === "ranking" ? "ranking" : "classification");
+  // Overall and Ranking are single-view sections; every other tab belongs to Classification.
+  const sectionOf = (tab) => (tab === "ranking" || tab === "overall" ? tab : "classification");
 
   function readHash() {
     const [tab, q] = location.hash.slice(1).split("?");
     const p = new URLSearchParams(q || "");
-    return { tab: tab || "leaderboard", s: p.get("s"), show: p.get("show") };
+    return { tab: tab || "overall", s: p.get("s"), show: p.get("show") };
   }
 
   function hashQuery() {
@@ -1215,14 +1343,14 @@ window.BENCHMARK_DATA = __BENCHMARK_DATA__;
       const keys = (h.show || "").split(",").filter((k) => byKey(k));
       state[SHOWN[p].col] = keys.length && keys.length < D.models.length ? keys : null;
     }
-    state.tab = RENDER[h.tab] ? h.tab : "leaderboard";
+    state.tab = RENDER[h.tab] ? h.tab : "overall";
   }
 
   function setTab(tab) {
-    if (!RENDER[tab]) tab = "leaderboard";
+    if (!RENDER[tab]) tab = "overall";
     state.tab = tab;
-    if (tab !== "ranking") state.clsTab = tab;
     const section = sectionOf(tab);
+    if (section === "classification") state.clsTab = tab;
     document.body.dataset.tab = tab;
     document.body.dataset.section = section;
     document.querySelectorAll(".section-tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.section === section)));
@@ -1666,7 +1794,7 @@ window.BENCHMARK_DATA = __BENCHMARK_DATA__;
 
   // ---------- wiring ----------
   document.querySelectorAll(".tab").forEach((b) => (b.onclick = () => setTab(b.dataset.tab)));
-  document.querySelectorAll(".section-tab").forEach((b) => (b.onclick = () => setTab(b.dataset.section === "ranking" ? "ranking" : state.clsTab || "leaderboard")));
+  document.querySelectorAll(".section-tab").forEach((b) => (b.onclick = () => setTab(b.dataset.section === "classification" ? state.clsTab || "leaderboard" : b.dataset.section)));
   $("csvBtn").onclick = downloadVariantsCsv;
   window.addEventListener("hashchange", () => { applyHash(); pruneShown(); setTab(state.tab); });
   let resizeT;
