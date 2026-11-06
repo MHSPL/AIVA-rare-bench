@@ -1,5 +1,5 @@
 """
-Configuration for AIVA Rare Bench.
+Configuration for RareDx Bench.
 """
 
 import os

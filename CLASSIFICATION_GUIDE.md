@@ -1,4 +1,4 @@
-# AIVA Rare Bench: Adding or Updating a Classification Model
+# RareDx Bench: Adding or Updating a Classification Model
 
 Every model update goes through a pull request: run the model, register its
 results, rebuild the dashboard, and open the PR. The dashboard

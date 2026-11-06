@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AIVA Rare Bench</title>
+<title>RareDx Bench: Rare Disease Diagnostics Benchmark</title>
 <link rel="icon" type="image/png" href="__MAMIDI_ICON__">
 <style id="fontFaces">__FONT_FACES__</style>
 <style>
@@ -275,6 +275,8 @@ table.cm td.rowh { text-align: right; padding-right: 8px; }
 .sf-mail svg { color: var(--bar-accent); flex-shrink: 0; }
 .sf-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 24px 0 32px; border-top: 1px solid rgba(241, 233, 221, 0.12); }
 .sf-bottom p, .sf-bottom a { font-size: 14px; color: rgba(241, 233, 221, 0.6); }
+.sf-credits { display: grid; gap: 6px; }
+.sf-credits a { text-decoration: underline; text-underline-offset: 2px; }
 .sf-legal { display: flex; gap: 24px; }
 .sf-cta p { margin-bottom: 16px; }
 .site-footer a.sf-btn {
@@ -486,7 +488,7 @@ th.selcol { color: var(--text); }
   <div class="wrap bar">
     <div class="brand">
       <a class="brand-logo" href="https://mamidi.ai/" target="_blank" rel="noopener"><img src="__MAMIDI_LOGO__" alt="Mamidi Health" width="36" height="36"></a>
-      <h1>AIVA Rare Bench</h1>
+      <h1>RareDx Bench</h1>
     </div>
     <nav class="sections" role="tablist" aria-label="Benchmarks">
       <button class="section-tab" role="tab" type="button" data-section="overall">Overall</button>
@@ -673,7 +675,10 @@ th.selcol { color: var(--text); }
       </div>
     </div>
     <div class="sf-bottom">
-      <p>&copy; <span id="sfYear">2026</span> Mamidi Health LLC. All rights reserved.</p>
+      <div class="sf-credits">
+        <p>&copy; <span id="sfYear">2026</span> Mamidi Health Inc. All rights reserved.</p>
+        <p>Benchmark runs led by Arun Boddapati, <a href="https://primeomicx.com/" target="_blank" rel="noopener">PrimeOmicX</a>.</p>
+      </div>
       <nav class="sf-legal" aria-label="Legal">
         <a href="https://mamidi.ai/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>
         <a href="https://mamidi.ai/terms-of-service" target="_blank" rel="noopener">Terms of Service</a>
@@ -1301,7 +1306,7 @@ window.BENCHMARK_DATA = __BENCHMARK_DATA__;
       const calls = ms.map((m) => t.labels[t.calls[m.key][i]] || "");
       lines.push([...r, ...calls].map(csvCell).join(","));
     });
-    download(new Blob([lines.join("\r\n") + "\r\n"], { type: "text/csv" }), `aiva-rare-bench-variants-${t.rows.length}.csv`);
+    download(new Blob([lines.join("\r\n") + "\r\n"], { type: "text/csv" }), `raredxbench-variants-${t.rows.length}.csv`);
     toast(`Downloaded ${int(t.rows.length)} variants with calls from ${ms.length} models.`);
   }
 
@@ -1745,7 +1750,7 @@ window.BENCHMARK_DATA = __BENCHMARK_DATA__;
   const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
   function figureName(card) {
-    const parts = ["aiva-rare-bench", card.querySelector(".card-head h3").textContent];
+    const parts = ["raredxbench", card.querySelector(".card-head h3").textContent];
     const p = card.querySelector("#cmGrid") ? "cm" : card.querySelector("#critGrid") ? "crit" : null;
     if (p && state[SHOWN[p].col]) parts.push(shownModels(p).map((m) => m.short_name).join(" vs "));
     if (card.querySelector("#cmGrid")) parts.push(state.cmScale + "-class", state.cmMode === "count" ? "counts" : "row-pct");

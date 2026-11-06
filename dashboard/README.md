@@ -1,4 +1,4 @@
-# AIVA Rare Bench dashboard
+# RareDx Bench dashboard
 
 `index.html` is a self-contained page: open it directly, or run the local
 server for editing. It is published at https://benchmarks.aivaportal.com by

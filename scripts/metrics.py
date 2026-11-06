@@ -1,5 +1,5 @@
 """
-Shared metrics utilities for AIVA benchmark.
+Shared metrics utilities for RareDx Bench.
 
 Common functions for classification normalization, metrics calculation,
 and result loading used by the analysis scripts and the dashboard build.

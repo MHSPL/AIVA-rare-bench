@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unified script for AIVA Rare Bench results generation.
+Unified script for RareDx Bench results generation.
 
 Combines functionality for:
 1. Core metric calculations (accuracy, F1, etc.)

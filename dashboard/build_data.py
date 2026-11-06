@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Dashboard Data Builder for AIVA Rare Bench (variant classification).
+Dashboard Data Builder for RareDx Bench (variant classification).
 
 Scans all model results in this repository, computes comprehensive
 metrics, confusion matrices, disease category breakdowns, safety audits,
@@ -567,8 +567,8 @@ def build_dashboard_dataset():
     # -------------------------------------------------------------------------
     payload = {
         "metadata": {
-            "title": "AIVA Rare Bench",
-            "subtitle": "Anthropic Claude vs Frontiers & Classical Baselines on ClinGen Curated Variant Classification",
+            "title": "RareDx Bench",
+            "subtitle": "An open rare disease diagnostics benchmark for any AI model or classical tool, scored against ClinGen expert classifications",
             "evaluation_date": datetime.now().strftime("%B %d, %Y"),
             "total_variants": total_cohort,
             "categories": CATEGORY_ORDER,
