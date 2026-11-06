@@ -1,7 +1,9 @@
 # AIVA Rare Bench dashboard
 
-`index.html` is a self-contained page: open it directly, serve it with
-GitHub Pages, or run the local server for editing.
+`index.html` is a self-contained page: open it directly, or run the local
+server for editing. It is published at https://benchmarks.aivaportal.com by
+`.github/workflows/pages.yml`, which deploys `index.html` to GitHub Pages
+whenever it changes on `main`.
 
 `index.html` is generated, so do not edit it by hand. Make page changes in
 `template.html`, then run `python3 dashboard/generate_html.py`, which fills the
