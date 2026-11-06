@@ -37,7 +37,7 @@ Re-generate the full 8,387-variant cohort from the BIAS-2015 supplementary files
 | File | Contents | Use it to |
 |------|----------|-----------|
 | `data/classification/aiva_bench_input.jsonl` | The 2,894 variants with no classifications: `id`, `variation`, `variation_original`, `hgvs_expressions`, `variant_key`, `gene_symbol`, `disease`, `mode_of_inheritance`, `genome_build` (GRCh37, for `variant_key`), `expert_panel` | Run any model or tool on the benchmark without seeing the answers |
-| `data/classification/erepo_bias_intervar_merged.jsonl` | The same 2,894 variants with the answers: eRepo expert classification and met criteria, BIAS-2015 and InterVar predictions | Score results (matched on `id`) |
+| `data/classification/erepo_bias_intervar_merged.jsonl` | The same 2,894 variants with the answers: eRepo expert classification and met criteria, BIAS-2015 v3 and InterVar predictions | Score results (matched on `id`) |
 
 To benchmark your own classifier, run it on `aiva_bench_input.jsonl` and write
 one JSON line per variant with its `id`, a 5-class `classification`
@@ -247,7 +247,7 @@ python scripts/parse_bias_data.py
 This creates `data/classification/erepo_bias_intervar_full.jsonl` containing 8,387 variants with:
 - Ground truth classifications from eRepo
 - InterVar predictions
-- BIAS-2015 predictions
+- BIAS-2015 predictions (v2.0.0, from the supplementary files above; the benchmark file carries v3)
 - All in AIVA-compatible format (hg19/GRCh37)
 
 #### Step 3: Run AIVA and Compare

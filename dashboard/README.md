@@ -74,6 +74,10 @@ GPT-6.1 Sol; Claude Code Opus, Sonnet and Haiku; BIAS-2015; InterVar), so the
 set concentrates on variants that are hard to classify. It is fixed: models
 added later run on these same variants.
 
+The BIAS-2015 calls and criteria are from BIAS-2015 v3 (3.0.0), taken from
+`MHSPL/AIVA-var-bench` (commit `b44327e`) for these 2,894 variants. The set
+itself was selected with the earlier v2.0.0 calls and was not re-selected.
+
 `data/classification/aiva_bench_input.jsonl` holds the same 2,894 variants without any
 classification (expert, BIAS-2015 or InterVar), for running a model or sharing
 the benchmark; results are matched to the answers by `id`.
