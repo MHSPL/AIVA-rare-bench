@@ -5,11 +5,29 @@ server for editing. It is published at https://benchmarks.aivaportal.com by
 `.github/workflows/pages.yml`, which deploys `index.html` to GitHub Pages
 whenever it changes on `main`.
 
-`index.html` is generated, so do not edit it by hand. Make page changes in
-`template.html`, then run `python3 dashboard/generate_html.py`, which fills the
-template's placeholders (`__FONT_FACES__`, `__MAMIDI_LOGO__`, `__MAMIDI_ICON__`,
-`__BENCHMARK_DATA__`) and writes `index.html`. Edits made only to `index.html`
-are lost the next time it is generated.
+`index.html` is generated, so do not edit it by hand. Make page changes in the
+source files below, then run `python3 dashboard/generate_html.py`, which inlines
+the CSS and JS, fills the template's placeholders (`__FONT_FACES__`,
+`__MAMIDI_LOGO__`, `__MAMIDI_ICON__`, `__MAMIDI_WORDMARK__`, `__BENCHMARK_DATA__`) and writes
+`index.html`. Edits made only to `index.html` are lost the next time it is
+generated.
+
+| File | Contents |
+|---|---|
+| `template.html` | Page skeleton: head, header, views, footer, and the script's startup wiring |
+| `css/base.css` | Theme tokens, header, view bar, cards, controls, tables, tooltip, dialog |
+| `css/views.css` | Footer, Overall and Ranking sections, model pickers, leaderboard, criteria grid, phone layout, figure export |
+| `js/core.js` | Constants, helpers, tooltip, footer, model naming and selection |
+| `js/leaderboard.js` | Leaderboard table, Overall snapshot, accuracy against safety scatter |
+| `js/views.js` | Categories, confusion matrices, ACMG criteria, agreement heatmap, variants CSV, tabs and URL |
+| `js/figure-svg.js` | Redraws a figure card as editable SVG |
+| `js/figure-files.js` | TIFF encoding, downloads, and the export menu |
+
+The template pulls them in with include lines (`/* @include css/base.css */`,
+`// @include js/core.js`). All JS files run inside one closure, in the order the
+template lists them, so they share constants and functions. The data build
+(`build_data.py`) is split the same way: `loaders.py`, `scoring.py`,
+`variant_table.py` and `archive.py`.
 
 Three sections: **Overall** (`#overall`), **Variant Classification**
 (everything below) and **Variant Ranking** (`#ranking`, an empty state until

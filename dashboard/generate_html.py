@@ -5,10 +5,15 @@ Generates the standalone benchmark dashboard (dashboard/index.html).
 Reads dashboard/data/benchmark_data.json (written by build_data.py). If that
 file is absent, the dataset already embedded in the current index.html is
 reused, so the page can be restyled without re-running every model.
+
+template.html is the page skeleton. Its styles and script live in css/ and js/
+and are pulled in by include lines (`/* @include css/base.css */`,
+`// @include js/core.js`), so the generated page stays one self-contained file.
 """
 
 import base64
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -46,6 +51,27 @@ def load_benchmark_data() -> dict:
     sys.exit(f"No dataset found. Run dashboard/build_data.py first (expected {DATA_FILE}).")
 
 
+# A line holding only "/* @include path */" or "// @include path" (path relative to dashboard/)
+INCLUDE_LINE = re.compile(r"^[ \t]*(?:/\*|//) @include (\S+?)(?: \*/)?[ \t]*(?:\n|\Z)", re.MULTILINE)
+# Any line still mentioning @include after expansion is a malformed include
+STRAY_INCLUDE = re.compile(r"^[ \t]*(?:/\*|//|<!--)?[ \t]*@include\b.*$", re.MULTILINE)
+
+
+def inline_includes(template: str) -> str:
+    """Replace each include line with the contents of the file it names."""
+    def contents(match):
+        path = TEMPLATE_FILE.parent / match.group(1)
+        if not path.is_file():
+            sys.exit(f"{TEMPLATE_FILE.name}: included file not found: {match.group(1)}")
+        return path.read_text(encoding="utf-8")
+    html = INCLUDE_LINE.sub(contents, template)
+    stray = STRAY_INCLUDE.search(html)
+    if stray:
+        sys.exit(f"{TEMPLATE_FILE.name}: malformed include line: {stray.group(0).strip()!r} "
+                 "(use '/* @include css/file.css */' or '// @include js/file.js' on a line of its own)")
+    return html
+
+
 def font_faces_css() -> str:
     rules = []
     for family, name in FONT_FILES:
@@ -72,7 +98,7 @@ def to_script_json(obj) -> str:
 def main():
     data = load_benchmark_data()
 
-    template = TEMPLATE_FILE.read_text(encoding="utf-8")
+    template = inline_includes(TEMPLATE_FILE.read_text(encoding="utf-8"))
     html = template.replace("__FONT_FACES__", font_faces_css())
     assets = REPO_ROOT / "dashboard" / "assets"
     html = html.replace("__MAMIDI_LOGO__", data_uri(assets / "mamidi-logo.png", "image/png"))
